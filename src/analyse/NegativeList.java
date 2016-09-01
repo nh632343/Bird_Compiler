@@ -17,10 +17,11 @@ public class NegativeList extends ASTList {
 	@Override
 	public Object eval(Environment env) {
 		Object result=child(0).eval(env);
-		if(!(result instanceof Integer)){
-			throw new StoneException("can not convert to \"-\" ");
-		}
-		return -(((Integer)result).intValue());
+		if(result instanceof Integer)
+		  return -(((Integer)result).intValue());
+		if(result instanceof Double)
+			return -(((Double)result).doubleValue());
+		throw new StoneException("can not convert to -", this);
 	}
 	
 

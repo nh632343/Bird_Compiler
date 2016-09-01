@@ -3,6 +3,8 @@ package analyse;
 
 import java.util.HashSet;
 
+import analyse_array.Array;
+import analyse_array.Index;
 import analyse_class.AtList;
 import analyse_class.ClassBody;
 import analyse_class.DefClassList;
@@ -38,6 +40,8 @@ public class BasicParser {
     protected Parser empty;
     protected Parser program;
     
+    protected Parser array;
+    
     protected Parser def;
     protected Parser param;
     protected Parser args;
@@ -70,8 +74,11 @@ public class BasicParser {
 		
 		expr=Parser.rule();
 	   postfix=Parser.rule();
+	   
+	   array=Parser.rule().sep("{").maybe(Parser.rule(Array.class).ast(expr).repeat(Parser.rule().sep(",").ast(expr))).sep("}") ;
 	   //BNF:  Primary: "(" expr ")" |number | string  | "@" identifier | identifier {postfix}
-	   primary=Parser.rule().or(Parser.rule().sep("(").ast(expr).sep(")"),
+	   primary=Parser.rule().or(array,
+			                    Parser.rule().sep("(").ast(expr).sep(")"),
 	    		                Parser.rule().number(NumLeaf.class),
 	    		                Parser.rule().string(StrLeaf.class),
 	    		                Parser.rule(AtList.class).sep("@").identifier(NameLeaf.class, reserved),
@@ -103,12 +110,13 @@ public class BasicParser {
 	   args=Parser.rule(ArgList.class).ast(expr).repeat(Parser.rule().sep(",").ast(expr));
 	   
 	   // postfix: "(" [args] ")"
-	   postfix=postfix.or(Parser.rule().sep("(").maybe(args).sep(")"));
+	   postfix=postfix.or(Parser.rule(Index.class).sep("[").ast(expr).sep("]")
+			   ,Parser.rule().sep("(").maybe(args).sep(")"));
 	   
 	   empty=Parser.rule(EmptyList.class);
 	   
 	   // program: [statement| def] (;|EOL)
-	   program=Parser.rule().option(Parser.rule().or(def,statement,empty)).sep(";"+Token.EOL,";",Token.EOL);
+	   program=Parser.rule().option(Parser.rule().or(def,statement,empty)).sep(";",Token.EOL);
 	   
 	   if(bibao){
 		  
@@ -153,7 +161,7 @@ public class BasicParser {
 				ASTree t= basicParser.parse(lexer);
 				//t.display(0);                  //展示语法树
 				Object object=t.eval(env);
-			    //System.out.println("=>> "+object);   //显示语句执行结果
+			    System.out.println("=>> "+object);   //显示语句执行结果
 	
         }
 }

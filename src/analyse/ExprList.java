@@ -20,7 +20,7 @@ public class ExprList extends ASTList {
 		// TODO Auto-generated constructor stub
 	}
 	
-	public int numberCompute(int a,String operator,int b) {
+	public int IntegerCompute(int a,String operator,int b) {
 		if(operator.equals("+"))  return a+b;
 		if(operator.equals("-"))  return a-b;
 		if(operator.equals("*"))  return a*b;
@@ -31,7 +31,20 @@ public class ExprList extends ASTList {
 		if(operator.equals("<"))  return a<b? 1:0;
 		if(operator.equals("<="))  return a<=b? 1:0;
 		if(operator.equals("=="))  return a==b? 1:0;
-		throw new StoneException("unknown operator \""+operator+"\"");
+		throw new StoneException("unknown operator \""+operator+"\"",this);
+	}
+	
+	public double DoubleCompute(double a,String operator,double b){
+		if(operator.equals("+"))  return a+b;
+		if(operator.equals("-"))  return a-b;
+		if(operator.equals("*"))  return a*b;
+		if(operator.equals("/"))  return a/b;
+		if(operator.equals(">"))  return a>b? 1:0;
+		if(operator.equals(">="))  return a>=b? 1:0;
+		if(operator.equals("<"))  return a<b? 1:0;
+		if(operator.equals("<="))  return a<=b? 1:0;
+		if(operator.equals("=="))  return a==b? 1:0;
+		throw new StoneException("unknown operator \""+operator+"\"",this);
 	}
 	
 	@Override
@@ -43,24 +56,45 @@ public class ExprList extends ASTList {
 			return child(0).fuzhi(env, child(2));
 		}
 		else {//获取左右两侧的值
-			Object left=child(0).eval(env);
-			Object right=child(2).eval(env);
+			
 			//运算符为 “&&” 
 			if(operator.equals("&&")){
+				Object left=child(0).eval(env);
 				left=Environment.judge(left);
+				if (!(boolean)left) {
+					return 0;
+				}
+				Object right=child(2).eval(env);
 				right=Environment.judge(right);
-				return ((boolean)left&&(boolean)right)==true? 1:0;
+				return (boolean)right? 1 : 0;
+				
 			}
 			//运算符为 “||”
 			if(operator.equals("||")){
+				Object left=child(0).eval(env);
 				left=Environment.judge(left);
+				if ((boolean)left) {
+					return 1;
+				}
+				Object right=child(2).eval(env);
 				right=Environment.judge(right);
-				return ((boolean)left||(boolean)right)==true? 1:0;
+				return (boolean)right? 1 : 0;
 			}
 			//两边都为整数，且运算符不是 &&  ||
+			
+			Object left=child(0).eval(env);
+			Object right=child(2).eval(env);
+			
 			if(left instanceof Integer&&right instanceof Integer){
-				return numberCompute(((Integer)left).intValue(), operator,((Integer)right).intValue());
+				return IntegerCompute(((Integer)left).intValue(), operator,((Integer)right).intValue());
 			}
+			
+			//两边为小数或整数
+			if ((left instanceof Integer || left instanceof Double) && 
+					(right instanceof Integer || right instanceof Double)) {
+				return DoubleCompute(((Number)left).doubleValue(), operator, ((Number)right).doubleValue());
+			}
+			
 			//运算符为 + 时，字符串加整数 和 整数加整数 和 字符串加字符串 是可行的
 			//整数加整数上面已考虑
 			if(operator.equals("+")){

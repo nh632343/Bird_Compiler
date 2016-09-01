@@ -20,6 +20,7 @@ public class WhileList extends ASTList {
 		Object result=null;
 		while(Environment.judge(condition)){
 			result=child(1).eval(env);
+			condition=child(0).eval(env);
 		}
 		return result;
 	}

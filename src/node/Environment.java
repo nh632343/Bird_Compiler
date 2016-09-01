@@ -10,8 +10,8 @@ public class Environment {
     
     //判断用的方法，只有为0才是false，其他都是true
     public static boolean judge(Object object){
-    	if(object instanceof Integer){
-    		if(((Integer) object).intValue()==0)
+    	if(object instanceof Number){
+    		if(((Number) object).intValue()==0)
     			return false;
     	}
     	return true;

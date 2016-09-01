@@ -23,7 +23,7 @@ public class ArgList extends PostfixList {
 				try {
 					NativeFunction nativeFunction=(NativeFunction) object;
 					if(numChildren()!=nativeFunction.getNumParams())
-						throw new StoneException("wrong args number");
+						throw new StoneException("wrong args number",this);
 					
 					Object[] args=new Object[numChildren()];
 					for(int i=0;i<numChildren();++i){
@@ -32,7 +32,7 @@ public class ArgList extends PostfixList {
    
 					return nativeFunction.invoke(args);
 				} catch (Exception e) {
-					throw new StoneException("invoke java function failed");
+					throw new StoneException("invoke java function failed",this);
 				} 
 				
 			    

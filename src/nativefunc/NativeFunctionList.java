@@ -1,6 +1,8 @@
 package nativefunc;
 
 import java.lang.reflect.Method;
+
+import basic.StoneException;
 import node.Environment;
 
 public class NativeFunctionList {
@@ -21,8 +23,14 @@ public class NativeFunctionList {
 		return String.valueOf(a);
 	}
 	
-	public static int length(String string) {
-		return string.length();
+	public static int length(Object object) {
+		if (object instanceof String) {
+			return ((String)object).length();
+		}
+		if (object instanceof Object[]) {
+			return ((Object[])object).length;
+		}
+		throw new StoneException("no length");
 	}
 	
 	public static int currentTime() {
@@ -43,7 +51,7 @@ public class NativeFunctionList {
 		append(environment, "print", new Class[]{Object.class}, 1);
 		append(environment, "parseInt", new Class[]{String.class}, 1);
 		append(environment, "parseString", new Class[]{int.class}, 1);
-		append(environment, "length", new Class[]{String.class}, 1);
+		append(environment, "length", new Class[]{Object.class}, 1);
 		append(environment, "currentTime", null, 0);
 	}
 }

@@ -3,6 +3,9 @@ package basic;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+
+import javax.security.auth.callback.TextOutputCallback;
+
 import java.util.ArrayList;
 import java.lang.reflect.Method;
 import java.lang.reflect.Constructor;
@@ -111,18 +114,18 @@ public class Parser {
             reserved = r != null ? r : new HashSet<String>();
         }
         protected boolean test(Token t) {
-            return t.isIdentifier() && !reserved.contains(t.getText());
+            return t.TYPE==Token.ID && !reserved.contains(t.getText());
         }
     }
 
     protected static class NumToken extends AToken {
         protected NumToken(Class<? extends ASTLeaf> type) { super(type); }
-        protected boolean test(Token t) { return t.isNumber(); }
+        protected boolean test(Token t) { return t.TYPE==Token.NUMBER; }
     }
 
     protected static class StrToken extends AToken {
         protected StrToken(Class<? extends ASTLeaf> type) { super(type); }
-        protected boolean test(Token t) { return t.isString(); }
+        protected boolean test(Token t) { return t.TYPE==Token.STRING; }
     }
 
     protected static class Leaf extends Element {
@@ -132,7 +135,7 @@ public class Parser {
             throws ParseException
         {
             Token t = lexer.read();
-            if (t.isIdentifier())
+            if (t.TYPE==Token.ID)
                 for (String token: tokens)
                     if (token.equals(t.getText())) {
                         find(res, t);
@@ -149,7 +152,7 @@ public class Parser {
         }
         protected boolean match(Lexer lexer) throws ParseException {
             Token t = lexer.peek(0);
-            if (t.isIdentifier())
+            if (t.TYPE==Token.ID)
                 for (String token: tokens)
                     if (token.equals(t.getText()))
                         return true;
@@ -215,7 +218,7 @@ public class Parser {
         }
         private Precedence nextOperator(Lexer lexer) throws ParseException {
             Token t = lexer.peek(0);
-            if (t.isIdentifier())
+            if (t.TYPE==Token.ID)
                 return ops.get(t.getText());
             else
                 return null;

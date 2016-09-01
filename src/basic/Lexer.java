@@ -8,7 +8,7 @@ import java.util.regex.Pattern;
 
 public class Lexer {
     public static String regexPat
-        = "\\s*((//.*)|([0-9]+)|(\"(\\\\\"|\\\\\\\\|\\\\n|[^\"])*\")"
+        = "\\s*((//.*)|(-?[0-9]+\\.[0-9]+)|(-?[0-9]+)|(\"(\\\\\"|\\\\\\\\|\\\\n|[^\"])*\")"
           + "|[A-Z_a-z][A-Z_a-z0-9]*|==|<=|>=|&&|\\|\\||\\p{Punct})?";
     private Pattern pattern = Pattern.compile(regexPat);
     private ArrayList<Token> queue = new ArrayList<Token>();
@@ -71,9 +71,12 @@ public class Lexer {
         if (m != null) // if not a space
             if (matcher.group(2) == null) { // if not a comment
                 Token token;
-                if (matcher.group(3) != null)
-                    token = new NumToken(lineNo, Integer.parseInt(m));
+                if (matcher.group(3)!=null) {
+					token=new DoubleToken(lineNo, Double.parseDouble(m));
+				}
                 else if (matcher.group(4) != null)
+                    token = new NumToken(lineNo, Integer.parseInt(m));
+                else if (matcher.group(5) != null)
                     token = new StrToken(lineNo, toStringLiteral(m));
                 else
                     token = new IdToken(lineNo, m);
@@ -99,35 +102,50 @@ public class Lexer {
         return sb.toString();
     }
 
+    protected static class DoubleToken extends Token {
+        private double value;
+
+        protected DoubleToken(int line, double v) {
+            super(line,Token.NUMBER);
+            value = v;
+            
+        }
+        public String getText() { return Double.toString(value); }
+        public Object getNumber() { return value; }
+    }
+    
     protected static class NumToken extends Token {
         private int value;
 
         protected NumToken(int line, int v) {
-            super(line);
+            super(line,Token.NUMBER);
             value = v;
+            
         }
-        public boolean isNumber() { return true; }
+        
         public String getText() { return Integer.toString(value); }
-        public int getNumber() { return value; }
+        public Object getNumber() { return value; }
     }
 
     protected static class IdToken extends Token {
         private String text; 
         protected IdToken(int line, String id) {
-            super(line);
+            super(line,Token.ID);
             text = id;
+            
         }
-        public boolean isIdentifier() { return true; }
+        
         public String getText() { return text; }
     }
 
     protected static class StrToken extends Token {
         private String literal;
         StrToken(int line, String str) {
-            super(line);
+            super(line,Token.STRING);
             literal = str;
+            
         }
-        public boolean isString() { return true; }
+       
         public String getText() { return literal; }
     }
 }
